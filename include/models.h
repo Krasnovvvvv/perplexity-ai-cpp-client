@@ -352,6 +352,60 @@ public:
     }
 };
 
+/**
+* @brief Response from the Chat Completions API
+*/
+    struct ChatResponse {
+        std::string id;
+        std::string model;
+        int64_t created;
+        std::string content;
+        std::string finish_reason;
+        std::vector<std::string> citations;
+        std::vector<SearchResult> search_results;
+        Usage usage;
+
+        static ChatResponse from_json(const json& j) {
+            ChatResponse response;
+
+            response.id = j.at("id").get<std::string>();
+            response.model = j.at("model").get<std::string>();
+            response.created = j.at("created").get<int64_t>();
+
+            // Extracting content from choices
+            if (j.contains("choices") && j["choices"].is_array() && !j["choices"].empty()) {
+                const auto& choice = j["choices"][0];
+                if (choice.contains("message")) {
+                    response.content = choice["message"]["content"].get<std::string>();
+                }
+                if (choice.contains("finish_reason")) {
+                    response.finish_reason = choice["finish_reason"].get<std::string>();
+                }
+            }
+
+            // Quotes
+            if (j.contains("citations") && j["citations"].is_array()) {
+                for (const auto& url : j["citations"]) {
+                    response.citations.push_back(url.get<std::string>());
+                }
+            }
+
+            // Search results
+            if (j.contains("search_results") && j["search_results"].is_array()) {
+                for (const auto& result : j["search_results"]) {
+                    response.search_results.push_back(SearchResult::from_json(result));
+                }
+            }
+
+            // Usage info
+            if (j.contains("usage")) {
+                response.usage = Usage::from_json(j["usage"]);
+            }
+
+            return response;
+        }
+    };
+
 } // namespace perplexity
 
 #endif //PERPLEXITY_AI_CPP_CLIENT_MODELS_H
