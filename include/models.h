@@ -406,6 +406,32 @@ public:
         }
     };
 
+/**
+* @brief Data chunk for streaming
+*/
+    struct StreamChunk {
+        std::string id;
+        std::string delta_content;
+        std::optional<std::string> finish_reason;
+
+        static StreamChunk from_json(const json& j) {
+            StreamChunk chunk;
+            chunk.id = j.at("id").get<std::string>();
+
+            if (j.contains("choices") && j["choices"].is_array() && !j["choices"].empty()) {
+                const auto& choice = j["choices"][0];
+                if (choice.contains("delta") && choice["delta"].contains("content")) {
+                    chunk.delta_content = choice["delta"]["content"].get<std::string>();
+                }
+                if (choice.contains("finish_reason") && !choice["finish_reason"].is_null()) {
+                    chunk.finish_reason = choice["finish_reason"].get<std::string>();
+                }
+            }
+
+            return chunk;
+        }
+    };
+
 } // namespace perplexity
 
 #endif //PERPLEXITY_AI_CPP_CLIENT_MODELS_H
