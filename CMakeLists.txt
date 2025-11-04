@@ -8,8 +8,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(PERPLEXITY_BUILD_EXAMPLES "Build example programs" ON)
 option(PERPLEXITY_BUILD_TESTS "Build tests" OFF)
 
-find_package(CURL REQUIRED)
-find_package(nlohmann_json REQUIRED)
+find_package(CURL CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 add_library(perplexity INTERFACE)
 add_library(perplexity::perplexity ALIAS perplexity)
@@ -39,7 +39,7 @@ endif()
 
 install(DIRECTORY include/perplexity
         DESTINATION include
-        FILES_MATCHING PATTERN "*.hpp"
+        FILES_MATCHING PATTERN "*.h"
 )
 
 install(TARGETS perplexity
@@ -50,7 +50,7 @@ install(TARGETS perplexity
 install(EXPORT perplexity-targets
         FILE perplexity-targets.cmake
         NAMESPACE perplexity::
-        DESTINATION lib/cmake/perplexity
+        DESTINATION share/perplexity/cmake
 )
 
 
@@ -59,7 +59,7 @@ include(CMakePackageConfigHelpers)
 configure_package_config_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/perplexity-config.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/perplexity-config.cmake"
-        INSTALL_DESTINATION lib/cmake/perplexity
+        INSTALL_DESTINATION share/perplexity/cmake
 )
 
 write_basic_package_version_file(
@@ -71,5 +71,5 @@ write_basic_package_version_file(
 install(FILES
         "${CMAKE_CURRENT_BINARY_DIR}/perplexity-config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/perplexity-config-version.cmake"
-        DESTINATION lib/cmake/perplexity
+        DESTINATION share/perplexity/cmake
 )
