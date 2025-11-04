@@ -189,6 +189,169 @@ inline MessageRole role_from_string(const std::string& str) {
         }
     };
 
+/**
+ * @brief Request to the Chat Completions API
+ *
+ * Uses the Builder pattern to create queries conveniently
+ */
+class ChatRequest {
+private:
+    std::string model_;
+    std::vector<Message> messages_;
+    std::optional<double> temperature_;
+    std::optional<int> max_tokens_;
+    std::optional<double> top_p_;
+    std::optional<int> top_k_;
+    std::optional<double> presence_penalty_;
+    std::optional<double> frequency_penalty_;
+    bool stream_ = false;
+    bool return_citations_ = true;
+    bool return_images_ = false;
+    std::optional<std::vector<std::string>> search_domain_filter_;
+    std::optional<std::string> search_recency_filter_;
+
+public:
+    ChatRequest() = default;
+    explicit ChatRequest(std::string model) : model_(std::move(model)) {}
+
+    // Builder methods (fluent interface pattern)
+    ChatRequest& model(std::string m) {
+        model_ = std::move(m);
+        return *this;
+    }
+
+    ChatRequest& add_message(Message msg) {
+        messages_.push_back(std::move(msg));
+        return *this;
+    }
+
+    ChatRequest& add_message(MessageRole role, std::string content) {
+        messages_.emplace_back(role, std::move(content));
+        return *this;
+    }
+
+    ChatRequest& messages(std::vector<Message> msgs) {
+        messages_ = std::move(msgs);
+        return *this;
+    }
+
+    ChatRequest& temperature(double t) {
+        if (t < 0.0 || t > 2.0) {
+            throw ValidationError("Temperature must be between 0.0 and 2.0");
+        }
+        temperature_ = t;
+        return *this;
+    }
+
+    ChatRequest& max_tokens(int tokens) {
+        if (tokens < 1) {
+            throw ValidationError("max_tokens must be positive");
+        }
+        max_tokens_ = tokens;
+        return *this;
+    }
+
+    ChatRequest& top_p(double p) {
+        if (p < 0.0 || p > 1.0) {
+            throw ValidationError("top_p must be between 0.0 and 1.0");
+        }
+        top_p_ = p;
+        return *this;
+    }
+
+    ChatRequest& top_k(int k) {
+        if (k < 0) {
+            throw ValidationError("top_k must be non-negative");
+        }
+        top_k_ = k;
+        return *this;
+    }
+
+    ChatRequest& presence_penalty(double p) {
+        if (p < -2.0 || p > 2.0) {
+            throw ValidationError("presence_penalty must be between -2.0 and 2.0");
+        }
+        presence_penalty_ = p;
+        return *this;
+    }
+
+    ChatRequest& frequency_penalty(double p) {
+        if (p < -2.0 || p > 2.0) {
+            throw ValidationError("frequency_penalty must be between -2.0 and 2.0");
+        }
+        frequency_penalty_ = p;
+        return *this;
+    }
+
+    ChatRequest& stream(bool s) {
+        stream_ = s;
+        return *this;
+    }
+
+    ChatRequest& return_citations(bool c) {
+        return_citations_ = c;
+        return *this;
+    }
+
+    ChatRequest& return_images(bool i) {
+        return_images_ = i;
+        return *this;
+    }
+
+    ChatRequest& search_domain_filter(std::vector<std::string> domains) {
+        search_domain_filter_ = std::move(domains);
+        return *this;
+    }
+
+    ChatRequest& search_recency_filter(std::string filter) {
+        search_recency_filter_ = std::move(filter);
+        return *this;
+    }
+
+    void validate() const {
+        if (model_.empty()) {
+            throw ValidationError("Model must be specified");
+        }
+        if (messages_.empty()) {
+            throw ValidationError("At least one message is required");
+        }
+    }
+
+    // Serialization in JSON
+    json to_json() const {
+        validate();
+
+        json j = {
+            {"model", model_},
+            {"messages", json::array()}
+        };
+
+        for (const auto& msg : messages_) {
+            j["messages"].push_back(msg.to_json());
+        }
+
+        if (temperature_) j["temperature"] = *temperature_;
+        if (max_tokens_) j["max_tokens"] = *max_tokens_;
+        if (top_p_) j["top_p"] = *top_p_;
+        if (top_k_) j["top_k"] = *top_k_;
+        if (presence_penalty_) j["presence_penalty"] = *presence_penalty_;
+        if (frequency_penalty_) j["frequency_penalty"] = *frequency_penalty_;
+
+        j["stream"] = stream_;
+        j["return_citations"] = return_citations_;
+        j["return_images"] = return_images_;
+
+        if (search_domain_filter_) {
+            j["search_domain_filter"] = *search_domain_filter_;
+        }
+        if (search_recency_filter_) {
+            j["search_recency_filter"] = *search_recency_filter_;
+        }
+
+        return j;
+    }
+};
+
 } // namespace perplexity
 
 #endif //PERPLEXITY_AI_CPP_CLIENT_MODELS_H
