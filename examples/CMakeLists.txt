@@ -1,5 +1,6 @@
 set(EXAMPLES
-       example.cpp
+        basic_chat.cpp
+        async_requests.cpp
 )
 
 foreach(EXAMPLE_FILE ${EXAMPLES})
