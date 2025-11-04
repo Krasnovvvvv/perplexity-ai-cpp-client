@@ -108,6 +108,35 @@ inline MessageRole role_from_string(const std::string& str) {
         }
     };
 
+/**
+ * @brief Search result
+ */
+    struct SearchResult {
+        std::string title;
+        std::string url;
+        std::optional<std::string> snippet;
+        std::optional<std::string> date;
+        std::optional<std::string> last_updated;
+
+        static SearchResult from_json(const json& j) {
+            SearchResult result;
+            result.title = j.at("title").get<std::string>();
+            result.url = j.at("url").get<std::string>();
+
+            if (j.contains("snippet") && !j["snippet"].is_null()) {
+                result.snippet = j["snippet"].get<std::string>();
+            }
+            if (j.contains("date") && !j["date"].is_null()) {
+                result.date = j["date"].get<std::string>();
+            }
+            if (j.contains("last_updated") && !j["last_updated"].is_null()) {
+                result.last_updated = j["last_updated"].get<std::string>();
+            }
+
+            return result;
+        }
+    };
+
 } // namespace perplexity
 
 #endif //PERPLEXITY_AI_CPP_CLIENT_MODELS_H
