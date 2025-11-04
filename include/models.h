@@ -137,6 +137,58 @@ inline MessageRole role_from_string(const std::string& str) {
         }
     };
 
+/**
+* @brief Information about the use of tokens
+*/
+    struct Usage {
+        int prompt_tokens = 0;
+        int completion_tokens = 0;
+        int total_tokens = 0;
+        std::optional<std::string> search_context_size;
+
+        struct Cost {
+            double input_tokens_cost = 0.0;
+            double output_tokens_cost = 0.0;
+            double request_cost = 0.0;
+            double total_cost = 0.0;
+
+            static Cost from_json(const json& j) {
+                Cost cost;
+                if (j.contains("input_tokens_cost")) {
+                    cost.input_tokens_cost = j["input_tokens_cost"].get<double>();
+                }
+                if (j.contains("output_tokens_cost")) {
+                    cost.output_tokens_cost = j["output_tokens_cost"].get<double>();
+                }
+                if (j.contains("request_cost")) {
+                    cost.request_cost = j["request_cost"].get<double>();
+                }
+                if (j.contains("total_cost")) {
+                    cost.total_cost = j["total_cost"].get<double>();
+                }
+                return cost;
+            }
+        };
+
+        std::optional<Cost> cost;
+
+        static Usage from_json(const json& j) {
+            Usage usage;
+            usage.prompt_tokens = j.at("prompt_tokens").get<int>();
+            usage.completion_tokens = j.at("completion_tokens").get<int>();
+            usage.total_tokens = j.at("total_tokens").get<int>();
+
+            if (j.contains("search_context_size") && !j["search_context_size"].is_null()) {
+                usage.search_context_size = j["search_context_size"].get<std::string>();
+            }
+            if (j.contains("cost") && !j["cost"].is_null()) {
+                usage.cost = Cost::from_json(j["cost"]);
+            }
+
+            return usage;
+        }
+    };
+
 } // namespace perplexity
 
 #endif //PERPLEXITY_AI_CPP_CLIENT_MODELS_H
