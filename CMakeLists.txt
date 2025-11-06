@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(PERPLEXITY_BUILD_EXAMPLES "Build example programs" ON)
-option(PERPLEXITY_BUILD_TESTS "Build tests" OFF)
+option(PERPLEXITY_BUILD_TESTS "Build tests" ON)
 
 find_package(CURL CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
