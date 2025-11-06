@@ -2,7 +2,7 @@ name: C++ CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
     branches: [ main ]
 
@@ -37,3 +37,6 @@ jobs:
       - name: Build (macOS)
         if: runner.os == 'macOS'
         run: cmake --build build -- -j$(sysctl -n hw.logicalcpu)
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
