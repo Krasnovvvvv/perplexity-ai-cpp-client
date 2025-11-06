@@ -39,4 +39,6 @@ jobs:
         run: cmake --build build -- -j$(sysctl -n hw.logicalcpu)
 
       - name: Run tests
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
         run: ctest --test-dir build --output-on-failure

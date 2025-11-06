@@ -45,9 +45,9 @@ TEST(PerplexityUtils, RateLimiterBasic) {
 
 // Test: Client Exclusions
 TEST(PerplexityExceptions, AuthAndNetwork) {
-    EXPECT_THROW(AuthenticationError("fail"), AuthenticationError);
-    EXPECT_THROW(NetworkError("fail", 400), NetworkError);
-    EXPECT_THROW(RateLimitError("fail", 5), RateLimitError);
+    EXPECT_THROW(throw AuthenticationError("fail"), AuthenticationError);
+    EXPECT_THROW(throw NetworkError("fail", 400), NetworkError);
+    EXPECT_THROW(throw RateLimitError("fail", 5), RateLimitError);
 }
 
 TEST(PerplexityIntegration, RealRequest) {
